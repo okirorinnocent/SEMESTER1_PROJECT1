@@ -17,6 +17,7 @@
 
 def get_valid_float(prompt: str, min_val: float, max_val: float) -> float:
     """Prompts for a floating-point number and validates its range."""
+    # Keep asking until the user enters a number within the allowed range.
     while True:
         try:
             value = float(input(prompt))
@@ -31,6 +32,7 @@ def get_valid_float(prompt: str, min_val: float, max_val: float) -> float:
 
 def get_valid_int(prompt: str, min_val: int = 1) -> int:
     """Prompts for an integer and ensures it meets a minimum threshold."""
+    # Course counts and credit units must be whole numbers above the minimum.
     while True:
         try:
             value = int(input(prompt))
@@ -45,6 +47,7 @@ def get_valid_int(prompt: str, min_val: int = 1) -> int:
 
 def calculate_grade_point(score: float) -> tuple[float, str]:
     """Translates a raw score percentage into MUST Grade Points and Letter Grade."""
+    # Check from the highest grade boundary down to find the correct result.
     if score >= 80.0:
         return 5.0, "A"
     if score >= 75.0:
@@ -74,6 +77,7 @@ def main() -> None:
     total_credit_units = 0
     total_weighted_points = 0.0
 
+    # Collect and grade each course before producing the semester report.
     for course_number in range(1, course_count + 1):
         print(f"\n--- Course {course_number} Entry ----")
         code = input("Course Code (e.g., cs1101): ").strip().upper()
@@ -93,7 +97,10 @@ def main() -> None:
             "letter": letter,
         })
 
+    # GPA is weighted by credit units, so courses with more credits contribute more.
     gpa = total_weighted_points / total_credit_units
+
+    # Display the student's course-by-course results and final semester GPA.
     print("\n" + "=" * 55)
     print(f"ACADEMIC SUMMARY FOR: {student_name.upper()}")
     print("=" * 55)
