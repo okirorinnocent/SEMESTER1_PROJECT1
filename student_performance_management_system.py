@@ -1,23 +1,39 @@
-# while True:
-#   score = float(input("Enter score between 0 to 100 : "))
-#  if 0 <= score <= 100:
-#     break
-# else:
-#   print(" Error: score must be between 0 and 100.")
-#  print("Error: Invalid entry. Please enter a valid number.")
-
-
 """
-    MUST Course Grade & Academic Perfomance  Calculator
+    STUDENT PERFORMANCE MANAGEMENT SYSTEM
+    Semester GPA Calculator
+    
     Author: Okiror Innocent
-    Institution: Mbarara University Of Science and Technology
-    Description: Command-line tool to calculate semester GPA based on MUST grading scale
+    EMPLOYMENT: COMPUTER SCIENCE STUDENT
+    Institution: Mbarara University of Science and Technology (MUST)
+    Description: Lightweight command-line tool to calculate semester GPA based on 
+                 the university grading scale.
 """
+
+from dataclasses import dataclass
+import sys
+
+
+@dataclass
+class Course:
+    """Represents an academic course module."""
+    code: str
+    credits: int
+    score: float
+    gp: float
+    letter: str
+
+
+def get_valid_string(prompt: str) -> str:
+    """Prompts for a string and ensures non-empty input."""
+    while True:
+        value = input(prompt).strip()
+        if value:
+            return value
+        print("[!] Input cannot be empty. Please try again.")
 
 
 def get_valid_float(prompt: str, min_val: float, max_val: float) -> float:
     """Prompts for a floating-point number and validates its range."""
-    # Keep asking until the user enters a number within the allowed range.
     while True:
         try:
             value = float(input(prompt))
@@ -32,7 +48,6 @@ def get_valid_float(prompt: str, min_val: float, max_val: float) -> float:
 
 def get_valid_int(prompt: str, min_val: int = 1) -> int:
     """Prompts for an integer and ensures it meets a minimum threshold."""
-    # Course counts and credit units must be whole numbers above the minimum.
     while True:
         try:
             value = int(input(prompt))
@@ -46,8 +61,7 @@ def get_valid_int(prompt: str, min_val: int = 1) -> int:
 
 
 def calculate_grade_point(score: float) -> tuple[float, str]:
-    """Translates a raw score percentage into MUST Grade Points and Letter Grade."""
-    # Check from the highest grade boundary down to find the correct result.
+    """Translates a raw score percentage into Grade Points and Letter Grade."""
     if score >= 80.0:
         return 5.0, "A"
     if score >= 75.0:
@@ -66,55 +80,65 @@ def calculate_grade_point(score: float) -> tuple[float, str]:
 
 
 def main() -> None:
-    print("=============================")
-    print(" MUST SEMESTER ACADEMIC PERFORMANCE CALCULATOR")
-    print("=============================\n")
+    print("=====================================================")
+    print(" UNIVERSITY SEMESTER ACADEMIC PERFORMANCE CALCULATOR")
+    print("=====================================================\n")
 
-    student_name = input("Enter Student Full Name: ").strip()
-    course_count = get_valid_int(
-        "Enter number of courses taken this semester: ")
-    courses = []
-    total_credit_units = 0
-    total_weighted_points = 0.0
-
-    # Collect and grade each course before producing the semester report.
-    for course_number in range(1, course_count + 1):
-        print(f"\n--- Course {course_number} Entry ----")
-        code = input("Course Code (e.g., cs1101): ").strip().upper()
-        credit_units = get_valid_int("Credit units: ", min_val=1)
-        score = get_valid_float(
-            "Final Score Percentage (0-100): ", min_val=0.0, max_val=100.0
+    try:
+        student_name = get_valid_string("Enter Student Full Name: ")
+        course_count = get_valid_int(
+            "Enter number of courses taken this semester: "
         )
 
-        grade_point, letter = calculate_grade_point(score)
-        total_credit_units += credit_units
-        total_weighted_points += grade_point * credit_units
-        courses.append({
-            "code": code,
-            "credits": credit_units,
-            "score": score,
-            "gp": grade_point,
-            "letter": letter,
-        })
+        courses: list[Course] = []
+        total_credit_units = 0
+        total_weighted_points = 0.0
 
-    # GPA is weighted by credit units, so courses with more credits contribute more.
-    gpa = total_weighted_points / total_credit_units
+        for course_number in range(1, course_count + 1):
+            print(f"\n--- Course {course_number} Entry ---")
+            code = get_valid_string("Course Code (e.g., CS1101): ").upper()
+            credit_units = get_valid_int("Credit units: ", min_val=1)
+            score = get_valid_float(
+                "Final Score Percentage (0-100): ", min_val=0.0, max_val=100.0
+            )
 
-    # Display the student's course-by-course results and final semester GPA.
-    print("\n" + "=" * 55)
-    print(f"ACADEMIC SUMMARY FOR: {student_name.upper()}")
-    print("=" * 55)
-    print(f"{'CODE':<10} | {'CREDITS':<8} | {'SCORE':<10} | GRADE")
-    print("-" * 55)
-    for course in courses:
-        print(
-            f"{course['code']:<10} | {course['credits']:<8} | "
-            f"{course['score']:<10.1f} | {course['letter']}"
-        )
-    print("-" * 55)
-    print(f"Total Credit Units Accumulated : {total_credit_units}")
-    print(f"Final Semester GPA             : {gpa:.2f}/5.00")
-    print("=" * 55)
+            grade_point, letter = calculate_grade_point(score)
+
+            total_credit_units += credit_units
+            total_weighted_points += grade_point * credit_units
+
+            courses.append(
+                Course(
+                    code=code,
+                    credits=credit_units,
+                    score=score,
+                    gp=grade_point,
+                    letter=letter,
+                )
+            )
+
+        # Calculate credit-weighted GPA
+        gpa = total_weighted_points / total_credit_units if total_credit_units > 0 else 0.0
+
+        # Display the formatted summary
+        print("\n" + "=" * 60)
+        print(f"ACADEMIC SUMMARY FOR: {student_name.upper()}")
+        print("=" * 60)
+        print(f"{'CODE':<10} | {'CREDITS':<8} | {'SCORE':<10} | {'GRADE':<6} | GP")
+        print("-" * 60)
+        for course in courses:
+            print(
+                f"{course.code:<10} | {course.credits:<8} | "
+                f"{course.score:<10.1f} | {course.letter:<6} | {course.gp:.1f}"
+            )
+        print("-" * 60)
+        print(f"Total Credit Units : {total_credit_units}")
+        print(f"Semester GPA       : {gpa:.2f}/5.00")
+        print("=" * 60)
+
+    except KeyboardInterrupt:
+        print("\n\n[!] Operation cancelled by user. Exiting gracefully...")
+        sys.exit(0)
 
 
 if __name__ == "__main__":
